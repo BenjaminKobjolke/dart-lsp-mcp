@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "dart-lsp": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["--directory", "${CLAUDE_PLUGIN_ROOT}", "run", "python", "-m", "dart_lsp_watcher.mcp_server"]
+    }
+  }
+}
