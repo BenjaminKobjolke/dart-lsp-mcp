@@ -7,3 +7,5 @@ mcp.log
 errors.txt
 .claude
 code_analysis_rules.json
+code_analysis_results
+tools/analyze_code.bat
