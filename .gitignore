@@ -1,1 +1,9 @@
 .venv
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+mcp.log
+errors.txt
+.claude
+code_analysis_rules.json
