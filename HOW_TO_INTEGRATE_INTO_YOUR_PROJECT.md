@@ -63,6 +63,7 @@ Before using Search/Glob/Grep/Read to find implementations, references, or defin
 | `mcp__dart-lsp__search_symbols` | Search symbols across entire workspace by name |
 | `mcp__dart-lsp__get_document_symbols` | Get all symbols (classes, functions, variables) in a file |
 | `mcp__dart-lsp__get_diagnostics` | Get Dart diagnostics/errors for project or file |
+| `mcp__dart-lsp__reindex` | Re-scan workspace to detect new/removed Dart files |
 
 ### Tool Parameters
 
@@ -99,6 +100,9 @@ mcp__dart-lsp__get_document_symbols(project_path, file_path)
 
 # Check for Dart errors in project
 mcp__dart-lsp__get_diagnostics(project_path)
+
+# Re-scan workspace after creating/deleting Dart files
+mcp__dart-lsp__reindex(project_path)
 ```
 
 ### When to Use LSP (ALWAYS for these tasks)
@@ -128,6 +132,7 @@ mcp__dart-lsp__get_diagnostics(project_path)
 | `get_document_symbols` | List all symbols in file | `project_path`, `file_path` |
 | `search_symbols` | Search workspace symbols | `project_path`, `query` |
 | `get_capabilities` | Get LSP server capabilities | `project_path` |
+| `reindex` | Re-scan workspace to detect new/removed Dart files | `project_path` |
 
 ## Configuration
 

@@ -165,6 +165,13 @@ Get LSP server capabilities for a project.
 **Parameters:**
 - `project_path` (required): Absolute path to the Dart project root
 
+### reindex
+
+Re-scan the workspace and index new or removed Dart files. Call this after creating, deleting, or renaming Dart files so the LSP server becomes aware of the changes.
+
+**Parameters:**
+- `project_path` (required): Absolute path to the Dart project root
+
 ## Logging
 
 The MCP server writes logs to `mcp.log` in the project root directory. This file contains detailed information about tool calls and any errors that occur.

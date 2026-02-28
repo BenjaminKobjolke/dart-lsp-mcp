@@ -85,6 +85,7 @@ When used as an MCP server, the following tools are available:
 | `get_document_symbols` | List all symbols in a file |
 | `search_symbols` | Search for symbols across the workspace |
 | `get_capabilities` | Get LSP server capabilities |
+| `reindex` | Re-scan workspace to detect new/removed Dart files |
 
 ## Configuration
 
