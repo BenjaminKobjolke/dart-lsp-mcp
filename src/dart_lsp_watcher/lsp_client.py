@@ -32,6 +32,7 @@ class LspClient:
         self.diagnostics_lock = threading.Lock()
         self.on_diagnostics_updated: Optional[Callable[[], None]] = None
         self.server_capabilities: dict[str, Any] = {}
+        self.opened_files: set[str] = set()
 
     def start(self) -> bool:
         """Start the Dart language server process."""
@@ -220,6 +221,7 @@ class LspClient:
             return
 
         uri = path_to_uri(file_path)
+        self.opened_files.add(normalize_uri(uri))
         self.send_notification(
             "textDocument/didOpen",
             {
@@ -255,6 +257,7 @@ class LspClient:
     def close_document(self, file_path: str) -> None:
         """Close a document in the LSP server."""
         uri = path_to_uri(file_path)
+        self.opened_files.discard(normalize_uri(uri))
         self.send_notification("textDocument/didClose", {"textDocument": {"uri": uri}})
 
         # Remove diagnostics for closed file

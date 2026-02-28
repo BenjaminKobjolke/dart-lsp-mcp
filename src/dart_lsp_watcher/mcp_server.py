@@ -209,16 +209,25 @@ def get_diagnostics(
 
         # Refresh file(s) to get latest diagnostics
         if file_path:
-            # Refresh single file
-            logger.info(f"Refreshing file: {file_path}")
-            client.change_document(file_path)
+            # Refresh single file — open it first if not yet known
+            file_uri = normalize_uri(path_to_uri(file_path))
+            if file_uri not in client.opened_files:
+                logger.info(f"Opening new file: {file_path}")
+                client.open_document(file_path)
+            else:
+                logger.info(f"Refreshing file: {file_path}")
+                client.change_document(file_path)
             time.sleep(CONSTANTS.DIAGNOSTICS_DELAY)  # Wait for LSP to process
         else:
-            # Refresh all Dart files in project
+            # Refresh all Dart files in project, opening any new ones
             logger.info("Refreshing all Dart files...")
             dart_files = scan_dart_files(project_path)
             for fp in dart_files:
-                client.change_document(fp)
+                fp_uri = normalize_uri(path_to_uri(fp))
+                if fp_uri not in client.opened_files:
+                    client.open_document(fp)
+                else:
+                    client.change_document(fp)
             time.sleep(CONSTANTS.DIAGNOSTICS_DELAY)
 
         with client.diagnostics_lock:
@@ -512,6 +521,60 @@ def search_symbols(project_path: str, query: str) -> str:
 
     except Exception as e:
         logger.exception("Error searching symbols")
+        return f"Error: {e}"
+
+
+@mcp.tool()
+def reindex(project_path: str) -> str:
+    """Re-scan the workspace and index new or removed Dart files.
+
+    Call this after creating, deleting, or renaming Dart files so the
+    LSP server becomes aware of the changes.
+
+    Args:
+        project_path: Absolute path to the Dart project root.
+
+    Returns:
+        Summary of files added, removed, and total.
+    """
+    logger.info(f"TOOL CALL: reindex(project_path={project_path!r})")
+    try:
+        client = get_lsp_client(project_path)
+
+        # Current files on disk
+        dart_files = scan_dart_files(project_path)
+        current_uris = {
+            normalize_uri(path_to_uri(fp)) for fp in dart_files
+        }
+
+        # Determine diff
+        new_uris = current_uris - client.opened_files
+        removed_uris = client.opened_files - current_uris
+
+        # Open new files
+        for uri in new_uris:
+            file_path = uri_to_path(uri)
+            logger.info(f"Reindex: opening new file {file_path}")
+            client.open_document(file_path)
+
+        # Close removed files
+        for uri in removed_uris:
+            file_path = uri_to_path(uri)
+            logger.info(f"Reindex: closing removed file {file_path}")
+            client.close_document(file_path)
+
+        # Wait for LSP to process
+        if new_uris or removed_uris:
+            time.sleep(CONSTANTS.DIAGNOSTICS_DELAY)
+
+        total = len(client.opened_files)
+        return (
+            f"Reindexed: {len(new_uris)} new file(s) added, "
+            f"{len(removed_uris)} file(s) removed, {total} total."
+        )
+
+    except Exception as e:
+        logger.exception("Error during reindex")
         return f"Error: {e}"
 
 
